@@ -4,8 +4,9 @@ import (
 	"github.com/ariefsam/openrtb"
 )
 
-func BidRequest(openrtb.BidRequest) openrtb.BidResponse {
+func Ariefsam(openrtb.BidRequest) openrtb.BidResponse {
 	var response openrtb.BidResponse
 	response.SeatBid = []openrtb.SeatBid{}
+	response.ID = "988"
 	return response
 }

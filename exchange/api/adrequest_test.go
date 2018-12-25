@@ -1,7 +1,7 @@
 package api
 
 import (
-	"reflect"
+	"fmt"
 	"testing"
 
 	"github.com/ariefsam/openrtb"
@@ -11,60 +11,67 @@ import (
 
 func MockBidRequest(openrtb.BidRequest) openrtb.BidResponse {
 	var response openrtb.BidResponse
+	response.ID = "sdfres"
 	response.SeatBid = []openrtb.SeatBid{}
 	return response
 }
 
-func Test_outbound(t *testing.T) {
-	type args struct {
-		req openrtb.BidRequest
-		dsp dsp.DSP
+func MockBidRequestService(delay int, id string) func(openrtb.BidRequest) openrtb.BidResponse {
+	x := id
+	Ret := func(openrtb.BidRequest) openrtb.BidResponse {
+		var response openrtb.BidResponse
+		response.ID = x
+		response.SeatBid = []openrtb.SeatBid{}
+		fmt.Println("calling service ", response.ID)
+		return response
 	}
-
-	var test1 args
-
-	test1.dsp.BidRequestService = MockBidRequest
-
-	tests := []struct {
-		name string
-		args args
-		want openrtb.BidResponse
-	}{
-		{
-			name: "Mock bid",
-			args: args{
-				req: openrtb.BidRequest{
-					ID: "1a",
-				},
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := outbound(tt.args.req, tt.args.dsp); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("outbound() = %v, want %v", got, tt.want)
-			}
-		})
-	}
+	return Ret
 }
 
-func Test_inbound(t *testing.T) {
-	type args struct {
-		req openrtb.BidRequest
-		ssp ssp.SSP
+func Test_Timeout(t *testing.T) {
+
+	dspList := make(map[string]dsp.DSP)
+
+	dspList["1"] = dsp.DSP{
+		ID:                "d1",
+		BidRequestService: MockBidRequestService(10, "1"),
 	}
-	tests := []struct {
-		name string
-		args args
-		want openrtb.BidResponse
-	}{
-		// TODO: Add test cases.
+	dspList["2"] = dsp.DSP{
+		ID:                "d2",
+		BidRequestService: MockBidRequestService(10, "2"),
 	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := inbound(tt.args.req, tt.args.ssp); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("inbound() = %v, want %v", got, tt.want)
-			}
-		})
+	dspList["3"] = dsp.DSP{
+		ID:                "d3",
+		BidRequestService: MockBidRequestService(10, "3"),
 	}
+
+	var req openrtb.BidRequest
+	req.ID = "sdfa"
+	var sspEntity ssp.SSP
+	dsp.DSPList = dspList
+	BidResponses := Inbound(req, sspEntity)
+	fmt.Println("Testing...", BidResponses)
+
+	// dsp.DSPList = dspList
+
+	// var test1 args
+	// test1.dsp.BidRequestService = MockBidRequestService(10, "1")
+
+	// tests := []struct {
+	// 	name string
+	// 	args args
+	// 	want openrtb.BidResponse
+	// }{
+	// 	{
+	// 		name: "Mock bid",
+	// 		args: test1,
+	// 	},
+	// }
+	// for _, tt := range tests {
+	// 	t.Run(tt.name, func(t *testing.T) {
+	// 		if got := outbound(tt.args.req, tt.args.dsp); !reflect.DeepEqual(got, tt.want) {
+	// 			//t.Errorf("outbound() = %v, want %v", got, tt.want)
+	// 		}
+	// 	})
+	// }
 }
