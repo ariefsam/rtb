@@ -16,14 +16,12 @@ func MockBidRequest(openrtb.BidRequest) openrtb.BidResponse {
 	return response
 }
 
-func MockBidRequestService(delay int, id string) func(openrtb.BidRequest) openrtb.BidResponse {
-	x := id
+func MockBidRequestService(delay int, response openrtb.BidResponse) func(openrtb.BidRequest) openrtb.BidResponse {
+	r := response
 	Ret := func(openrtb.BidRequest) openrtb.BidResponse {
-		var response openrtb.BidResponse
-		response.ID = x
-		response.SeatBid = []openrtb.SeatBid{}
-		fmt.Println("calling service ", response.ID)
-		return response
+		resp := r
+		fmt.Println("calling service ", resp.ID)
+		return resp
 	}
 	return Ret
 }
@@ -32,9 +30,17 @@ func Test_Timeout(t *testing.T) {
 
 	dspList := make(map[string]dsp.DSP)
 
+	var resp openrtb.BidResponse
+	var seat openrtb.SeatBid
+	var bid openrtb.Bid
+	bid.Price = 1000
+	resp.ID = "R1"
 	dspList["1"] = dsp.DSP{
-		ID:                "d1",
-		BidRequestService: MockBidRequestService(10, "1"),
+		ID: "d1",
+		BidRequestService: MockBidRequestService(
+			10,
+			resp,
+		),
 	}
 	dspList["2"] = dsp.DSP{
 		ID:                "d2",
