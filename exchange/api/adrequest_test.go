@@ -48,6 +48,10 @@ func Test_Bid(t *testing.T) {
 			resp,
 		),
 	}
+	bid.Price = 2500
+	seat.Bid = []openrtb.Bid{bid}
+	resp.ID = "R2"
+	resp.SeatBid = []openrtb.SeatBid{seat}
 	dspList["2"] = dsp.DSP{
 		ID: "d2",
 		BidRequestService: MockBidRequestService(
