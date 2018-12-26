@@ -37,7 +37,8 @@ func Test_Bid(t *testing.T) {
 	resp.ID = "R1"
 	resp.Currency = "IDR"
 
-	bid.Price = 1000
+	bid.ID = "B1"
+	bid.Price = 1
 	seat.Bid = []openrtb.Bid{bid}
 
 	resp.SeatBid = []openrtb.SeatBid{seat}
@@ -48,17 +49,25 @@ func Test_Bid(t *testing.T) {
 			resp,
 		),
 	}
+	bid.ID = "B2"
 	bid.Price = 2500
 	seat.Bid = []openrtb.Bid{bid}
 	resp.ID = "R2"
 	resp.SeatBid = []openrtb.SeatBid{seat}
 	dspList["2"] = dsp.DSP{
-		ID: "d2",
+		ID:   "d2",
+		Name: "DSP 2",
 		BidRequestService: MockBidRequestService(
 			10,
 			resp,
 		),
 	}
+
+	bid.ID = "B3"
+	bid.Price = 2500
+	seat.Bid = []openrtb.Bid{bid}
+	resp.ID = "R3"
+	resp.SeatBid = []openrtb.SeatBid{seat}
 	dspList["3"] = dsp.DSP{
 		ID: "d3",
 		BidRequestService: MockBidRequestService(
@@ -69,6 +78,11 @@ func Test_Bid(t *testing.T) {
 
 	var req openrtb.BidRequest
 	req.ID = "sdfa"
+	req.Imp = []openrtb.Impression{
+		openrtb.Impression{
+			ID: "i1",
+		},
+	}
 	var sspEntity ssp.SSP
 	dsp.DSPList = dspList
 	BidResponses := Inbound(req, sspEntity)
