@@ -8,16 +8,18 @@ import (
 	"github.com/ariefsam/rtb/exchange/api/ssp"
 )
 
-func Inbound(req openrtb.BidRequest, ssp ssp.SSP) openrtb.BidResponse {
+func InboundBid(req openrtb.BidRequest, ssp ssp.SSP) openrtb.BidResponse {
 	var response openrtb.BidResponse
-	responseList := outbound(req)
+	responseList := outboundBid(req)
 	for _, val := range responseList {
-		response = val
+		for _, seatBid := range val.SeatBid {
+			response.SeatBid = append(response.SeatBid, seatBid)
+		}
 	}
 	return response
 }
 
-func outbound(req openrtb.BidRequest) map[string]openrtb.BidResponse {
+func outboundBid(req openrtb.BidRequest) map[string]openrtb.BidResponse {
 	x := make(map[string]openrtb.BidResponse)
 	responseList := make(map[string]openrtb.BidResponse)
 	for _, v := range dsp.DSPList {
